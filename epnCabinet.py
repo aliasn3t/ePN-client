@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import json
-import re
 import threading
 import time
 import requests
@@ -189,13 +188,16 @@ class init(object):
             'epn_stat': '/stats/overall',           # api.get.epn_stat()
             'user_info': '/test/user-info',         # api.get.user_info()
             'transactions': '/transactions/user',   # api.get.transactions(tsFrom = '2019-12-23', tsTo = '2020-12-24', perPage = 1000)
-            'check_link': '/affiliate/checkLink',   # api.get.check_link(link='https://aliexpress.ru/item/4000581767061.html')
-            'short_domains': '/link-reduction/domain-cutter-list' # api.get.short_domains()
+            'check_link': '/affiliate/checkLink',   # api.get.check_link(link = 'https://aliexpress.ru/item/4000581767061.html')
+            'short_domains': '/link-reduction/domain-cutter-list', # api.get.short_domains()
+            'payments': '/user/payment/init',       # api.get.payments()
+            'purses': '/user/purses/list'           # api.get.purses()
         }
 
         post_methods = {
             'create_creative': '/creative/create',  # api.post.create_creative(link = 'https://aliexpress.ru/item/4000581767061.html', offerId = 1, description = 'test_deeplink', type = 'deeplink')
-            'short_link': '/link-reduction'         # api.post.short_link(urlContainer = 'https://aliexpress.ru/item/4000581767061.html', domainCutter = 'ali.pub')
+            'short_link': '/link-reduction',        # api.post.short_link(urlContainer = 'https://aliexpress.ru/item/4000581767061.html', domainCutter = 'ali.pub')
+            'payment_order': '/user/payment/order'  # api.post.payment_order(currency = 'USD', purseId = 1, amount = 1000)
         }
 
         values = values.copy() if values else {}
