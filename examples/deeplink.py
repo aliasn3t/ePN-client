@@ -3,7 +3,7 @@ import epnCabinet as epn
 def main():
     # Вход по данным от API
     grant_type, client_id, client_secret = ('client_credential', 'qwerty', 'asdfg')
-    client = epn.init(grant_type, client_id, client_secret)
+    client = epn.init(grant_type = grant_type, client_id = client_id, client_secret = client_secret)
 
     try:
         client.session()
