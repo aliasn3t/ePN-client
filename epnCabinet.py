@@ -5,12 +5,15 @@ import threading
 import time
 import requests
 import six
+import logging
 
 class init(object):
-    request_delay = 0.5
+    request_delay = 1 / 10
 
     def __init__(self, username = None, password = None, check_ip = None,
                 grant_type = 'password', client_id = 'web-client', client_secret = '60cfb46215e4058f39e69c1f4a103e4c'):
+
+        self.logger = logging.getLogger('ePN-client')
         
         self.login = username
         self.password = password
@@ -38,6 +41,9 @@ class init(object):
             self._auth_token()
 
     def _auth_token(self):
+        """ Получение токенов """
+
+        self.logger.info('Checking config data...')
         with open('epn.json', 'r') as config:
             cfg = json.load(config)
 
@@ -67,13 +73,16 @@ class init(object):
         )
 
         if response.ok:
+            self.logger.info('access_token is valid')
             return True
-        else: 
+        else:
+            self.logger.info('access_token is not valid')
             return False
 
     def _save_session(self):
         """ Сохранение токенов в файл """
 
+        self.logger.info('Saving new config data...')
         config_file = 'epn.json'
         with open(config_file, 'r') as config:
             cfg = json.load(config)
@@ -86,6 +95,8 @@ class init(object):
 
     def _token_refresh(self):
         """ Обновление токена """
+
+        self.logger.info('Refreshing access_token...')
 
         url = 'https://oauth2.epn.bz/token/refresh'
 
@@ -107,15 +118,19 @@ class init(object):
         )
 
         if response.ok:
+            self.logger.info('access_token updated')
             response = response.json()
             self.access_token = response['data']['attributes']['access_token']
             self.refresh_token = response['data']['attributes']['refresh_token']
             self._save_session()
         else:
+            self.logger.info('refresh_token is not valid')
             self._ssid()
 
     def _ssid(self):
         """ Получение SSID """
+
+        self.logger.info('Getting SSID...')
 
         url = 'https://oauth2.epn.bz/ssid'
 
@@ -130,14 +145,18 @@ class init(object):
         )
 
         if response.ok:
+            self.logger.info('SSID received')
             response = response.json()
             self.x_ssid = response['data']['attributes']['ssid_token']
             self._jwt_auth()
-        else: 
-            raise Exception('Error code: {}'.format(response.status_code))
+        else:
+            self.logger.error('Error code: {}'.format(response.status_code))
+            raise EpnApiException(**response.json()["errors"][0])
 
     def _jwt_auth(self):
         """ Авторизация """
+
+        self.logger.info('Getting JWT...')
 
         url = 'https://oauth2.epn.bz/token'
 
@@ -163,12 +182,14 @@ class init(object):
         )
 
         if response.ok:
+            self.logger.info('Tokens received')
             response = response.json()
             self.access_token = response['data']['attributes']['access_token']
             self.refresh_token = response['data']['attributes']['refresh_token']
             self._save_session()
         else: 
-            raise Exception('Error code: {}'.format(response.status_code))
+            self.logger.error('Error code: {}'.format(response.status_code))
+            raise EpnApiException(**response.json()["errors"][0])
 
     def api(self):
         return EpnApiMethod(self)
@@ -197,7 +218,10 @@ class init(object):
         post_methods = {
             'create_creative': '/creative/create',  # api.post.create_creative(link = 'https://aliexpress.ru/item/4000581767061.html', offerId = 1, description = 'test_deeplink', type = 'deeplink')
             'short_link': '/link-reduction',        # api.post.short_link(urlContainer = 'https://aliexpress.ru/item/4000581767061.html', domainCutter = 'ali.pub')
-            'payment_order': '/user/payment/order'  # api.post.payment_order(currency = 'USD', purseId = 1, amount = 1000)
+            'payment_order': '/user/payment/order', # api.post.payment_order(currency = 'USD', purseId = 1, amount = 1000)
+            'logout_client_id': '/logout',          # api.post.logout_client_id(client_id = 'asdfg')
+            'logout_refresh_token': '/logout/refresh-token', # api.post.logout_refresh_token(refresh_token = 'asdfg', client_id = 'asdfg')
+            'logout_all': '/logout/all'             # api.post.logout_all(client_id = 'asdfg')
         }
 
         values = values.copy() if values else {}
@@ -228,9 +252,11 @@ class init(object):
             self.last_request = time.time()
 
         if response.ok:
+            self.logger.info('{} request ({}) completed'.format(type, method))
             return response.json()
         else:
-            raise Exception('Error code: {}'.format(response.status_code))
+            self.logger.error('{} returned error code: {}'.format(params, response.status_code))
+            raise EpnApiException(**response.json()["errors"][0])
 
 
 class EpnApiMethod(object):
@@ -251,3 +277,12 @@ class EpnApiMethod(object):
                 kwargs[k] = ','.join(str(x) for x in v)
 
         return self._epn.method(self._method, kwargs)
+
+
+class EpnApiException(Exception):
+    def __init__(self, *args, **kwargs):
+        self.error_code = kwargs.get('error', None)
+        self.error_description = kwargs.get('error_description', None)
+
+    def __str__(self):
+        return 'Error code: {} - {}'.format(self.error_code, self.error_description)
