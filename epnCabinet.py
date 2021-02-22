@@ -6,6 +6,7 @@ import time
 import requests
 import six
 import logging
+from requests import Request, Session, RequestException
 
 class init(object):
     request_delay = 1 / 10
@@ -28,7 +29,7 @@ class init(object):
         self.client_id = client_id
         self.client_secret = client_secret
 
-        self.http = requests.Session()
+        self.http = Session()   
         self.http.headers.update({
             'User-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36'
             })
@@ -123,9 +124,11 @@ class init(object):
             self.access_token = response['data']['attributes']['access_token']
             self.refresh_token = response['data']['attributes']['refresh_token']
             self._save_session()
+            return True
         else:
             self.logger.info('refresh_token is not valid')
             self._ssid()
+            return False
 
     def _ssid(self):
         """ Получение SSID """
@@ -238,25 +241,32 @@ class init(object):
                 time.sleep(delay)
 
             if type == 'get':
-                response = self.http.get(
-                    url + get_methods[method],
-                    params = values
-                )
+                request = Request(method = "GET", url = url + get_methods[method], params = values)
+                prepared = self.http.prepare_request(request)
 
             elif type == 'post':
-                response = self.http.post(
-                    url + post_methods[method],
-                    data = values
-                )
+                request = Request(method = "POST", url = url + post_methods[method], data = values)
+                prepared = self.http.prepare_request(request)
 
+            response = self.http.send(prepared)
             self.last_request = time.time()
 
         if response.ok:
             self.logger.info('{} request ({}) completed'.format(type, method))
             return response.json()
         else:
-            self.logger.error('{} returned error code: {}'.format(params, response.status_code))
-            raise EpnApiException(**response.json()["errors"][0])
+            if response.status_code == 401:
+                if self._token_refresh():
+                    response = self.http.send(prepared)
+                    if response.ok:
+                        self.logger.info('{} second request ({}) completed'.format(type, method))
+                        return response.json()
+                    else:
+                        self.logger.error('{} second request returned error code: {}'.format(params, response.status_code))
+                        raise EpnApiException(**response.json()["errors"][0])
+            else:
+                self.logger.error('{} returned error code: {}'.format(params, response.status_code))
+                raise EpnApiException(**response.json()["errors"][0])
 
 
 class EpnApiMethod(object):
