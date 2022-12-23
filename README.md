@@ -70,7 +70,7 @@ api = client.api()
 |create_creative()|/api/v1/users/{user_id}/creatives|api.post.**create_creative**(link = 'https://aliexpress.ru/item/12345.html', title = "test")|Создание реферальной ссылки|
 |create_placement()|/api/v1/users/{user_id}/placements|api.post.**create_placement**(description = 'asdfg', type = 'personalBlog', subject = 'menFashion', aliRelation = 'direct', platform = 'telegram', theme = 'richMedia', 'link = 'https://aeplatform.ru/')|Добавление площадки|
 
-> Для create_placement доступны следующие параметры:
+> Для create_placement доступны следующие параметры:  
 **type** - personalBlog, themedBlog, other  
 **subject** - womenFashion, menFashion, phoneTelecommunications, computerOfficeSecurity, consumerElectronics, jewelryWatches, homePetAppliances, toysKidsBabies, outdoorFunSports, beautyHealthHair, automobilesMotorcycles, homeImprovementTools, other  
 **aliRelation** - direct, indirect, other  
