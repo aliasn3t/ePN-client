@@ -71,10 +71,10 @@ api = client.api()
 |create_placement()|/api/v1/users/{user_id}/placements|api.post.**create_placement**(description = 'asdfg', type = 'personalBlog', subject = 'menFashion', aliRelation = 'direct', platform = 'telegram', theme = 'richMedia', 'link = 'https://aeplatform.ru/')|Добавление площадки|
 
 > Для create_placement доступны следующие параметры:
-**type** -- personalBlog, themedBlog, other
-**subject** -- womenFashion, menFashion, phoneTelecommunications, computerOfficeSecurity, consumerElectronics, jewelryWatches, homePetAppliances, toysKidsBabies, outdoorFunSports, beautyHealthHair, automobilesMotorcycles, homeImprovementTools, other
-**aliRelation** -- direct, indirect, other
-**platform** -- fb, instagram, ok, pinterest, telegram, tiktok, twitter, viber, vk, website, whatsapp, other
-**theme** -- contextAds, bannerAds, richMedia, emailDelivery, publicGroup, teaserNetwork, doorway, contextSite, smsDelivery, pushAds, cashbackService, priceComparison, toolbarPlugin, mobileTraffic, remarketing, promoAggregator, youtubeChannel, targetAds, messenger, otherTheme
+**type** - personalBlog, themedBlog, other  
+**subject** - womenFashion, menFashion, phoneTelecommunications, computerOfficeSecurity, consumerElectronics, jewelryWatches, homePetAppliances, toysKidsBabies, outdoorFunSports, beautyHealthHair, automobilesMotorcycles, homeImprovementTools, other  
+**aliRelation** - direct, indirect, other  
+**platform** - fb, instagram, ok, pinterest, telegram, tiktok, twitter, viber, vk, website, whatsapp, other  
+**theme** - contextAds, bannerAds, richMedia, emailDelivery, publicGroup, teaserNetwork, doorway, contextSite, smsDelivery, pushAds, cashbackService, priceComparison, toolbarPlugin, mobileTraffic, remarketing, promoAggregator, youtubeChannel, targetAds, messenger, otherTheme
 
 **Важно:** Площадки на FB и Instagram банят, не стоит использовать эти параметры
