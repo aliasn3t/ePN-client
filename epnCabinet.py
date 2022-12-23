@@ -3,7 +3,6 @@
 import json
 import threading
 import time
-import requests
 import six
 import logging
 from requests import Request, Session, RequestException
